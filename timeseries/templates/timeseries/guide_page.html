@@ -1,0 +1,101 @@
+{% extends 'timeseries/base.html' %}
+{% load static %}
+{% block content %}
+<script src="https://polyfill.io/v3/polyfill.min.js?features=es6"></script>
+<script id="MathJax-script" async
+        src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js">
+</script>
+
+<div class="card col" style="width: 90%;">
+    <h3 class="text-center">Руководство по приложению</h3>
+    <p>1. Сначала вам необходимо внести файл с данными в формате .csv (заполненный по шаблону, который будет ниже) и
+        при желании вы можете указать на сколько лет хотите сделать прогноз.</p>
+    <div class="text-center">
+        <img src="{% static 'timeseries/photo/template.PNG' %}" width="15%" height="260px"
+             alt="...">
+    </div>
+    <p>2. После внесения корректного файла, приложение считает и выводит данные анализа и прогнозирования.</p>
+    <p>2.1. Данные для анализа считаются по формулам приведенным ниже.</p>
+    <p>Где \(y_i\) - текущий уровень ряда, \(y_{i-1}\) - предыдущий уровень ряда, \(y_0\) - начальный уровень
+        ряда, \(Т_{Р i}\) - текущий темп роста, \(Т_{Р i-1}\) - предыдущий темп роста </p>
+    <div style="display: flex; justify-content: center;">
+        <table style="width: 80%; font-size: 12px; ">
+            <thead>
+            <tr>
+                <th>Абсолютные приросты (цепные)</th>
+                <th>Абсолютные приросты (базисные)</th>
+                <th>Темпы роста цепные (коэффициенты)</th>
+                <th>Темпы роста цепные (проценты)</th>
+                <th>Темпы роста базисные (коэффициенты)</th>
+                <th>Темпы роста базисные (проценты)</th>
+                <th>Темпы прироста цепные (проценты)</th>
+                <th>Темпы прироста базисные (проценты)</th>
+                <th>Абсолютное значение 1% прироста</th>
+                <th>Относительное ускорение (проценты)</th>
+                <th>Коэффициент опережения</th>
+            </tr>
+            </thead>
+            <tbody>
+            <tr style="font-size: 15px">
+                <th>$$\Delta_Ц = y_i - y_{i-1}$$</th>
+                <th>$$\Delta_Б = y_i - y_0$$</th>
+                <th>$$ T_{Р Ц} = \frac{y_i}{y_{i-1}}$$</th>
+                <th>$$ T_{Р Ц} = \frac{y_i}{y_{i-1}}\times 100 $$</th>
+                <th>$$ T_{Р Б} = \frac{y_i}{y_0}$$</th>
+                <th>$$ T_{Р Б} = \frac{y_i}{y_0}\times 100 $$</th>
+                <th>$$\Delta Т_{П Ц} = \frac{\Delta_Ц}{y_{i-1}}\times 100$$</th>
+                <th>$$\Delta Т_{П Б} = \frac{\Delta_Б}{y_0}\times 100$$</th>
+                <th>$$A = \frac{\Delta_Ц}{\Delta Т_{П Ц}} $$</th>
+                <th>$$\Delta\% = Т_{Р i} - Т_{Р i-1}$$</th>
+                <th>$$K_{опер} = \frac{Т_{Р i}}{Т_{Р i-1}} $$</th>
+            </tr>
+            </tbody>
+        </table>
+    </div>
+
+    <p>2.2. Данные для анализа в виде диаграммы.</p>
+    <div class="text-center">
+        <img src="{% static 'timeseries/photo/diagram.PNG' %}" width="1342px" height="424px"
+             alt="...">
+    </div>
+    <p>3. Прогнозирование данных.</p>
+    <p>3.1. Прогнозирование данных происходит по формулам представленным ниже.</p>
+    <p>Где \(Г_i\) - текущий год, \(P_i\) - текущее значение рождаемости , \(\sum \Delta_{Ц i}\) - сумма абсолютных
+        приростов за весь период, n - число коэффициентов, \(K_n\) - цепные коэффициенты роста,  </p>
+    <div style="display: flex; justify-content: space-evenly; flex-direction: row;">
+        <table style="width: 30%; text-align: center">
+            <thead>
+            <tr>
+                <th>Год</th>
+                <th>Средний абсолютный прирост(количество)</th>
+                <th>Рождаемость</th>
+            </tr>
+            </thead>
+            <tbody>
+            <tr>
+                <td>$$ Г = Г_i + 1 $$</td>
+                <td>$$\overline{\Delta} = \frac{\sum \Delta_{Ц i}}{n} $$</td>
+                <td>$$ P = P_i + \overline{\Delta} $$</td>
+            </tr>
+            </tbody>
+        </table>
+        <table style="width: 30%; text-align: center">
+            <thead>
+            <tr>
+                <th>Год</th>
+                <th>Средний коэффициент роста</th>
+                <th>Рождаемость</th>
+            </tr>
+            </thead>
+            <tbody>
+            <tr>
+                <td>$$ Г = Г_i + 1 $$</td>
+                <td>$$\overline{K_p} = \sqrt[n]{K_1 * K_2 * ... * K_n} $$</td>
+                <td>$$ P = Р_i * \overline{K_p} $$</td>
+            </tr>
+            </tbody>
+        </table>
+    </div>
+</div>
+
+{% endblock %}

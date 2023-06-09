@@ -1,0 +1,210 @@
+{% extends 'timeseries/base.html' %}
+{% load static %}
+
+{% block content %}
+
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.2.1/dist/chart.umd.min.js"></script>
+<script src="{% static 'js/diagrams.js' %}"></script>
+
+<div class="card col"
+     style="width: 90% ; align-items: center">
+    {% csrf_token %}
+    <h3>Анализ данных</h3>
+    <table style="width: 60%; text-align: center">
+        <thead>
+        <tr>
+            <th>Год</th>
+            <th>Исходные значения</th>
+            <th>Абсолютные приросты (цепные)</th>
+            <th>Абсолютные приросты (базисные)</th>
+            <th>Темпы роста цепные (коэффициенты)</th>
+            <th>Темпы роста цепные (проценты)</th>
+            <th>Темпы роста базисные (коэффициенты)</th>
+            <th>Темпы роста базисные (проценты)</th>
+            <th>Темпы прироста цепные (проценты)</th>
+            <th>Темпы прироста базисные (проценты)</th>
+            <th>Абсолютное значение 1% прироста</th>
+            <th>Относительное ускорение (проценты)</th>
+            <th>Коэффициент опережения</th>
+        </tr>
+        </thead>
+        <tbody>
+        {% for num in data.mass %}
+        <tr>
+            <th>{{num.0}}</th>
+            <th>{{num.1}}</th>
+            <td>{{num.2}}</td>
+            <td>{{num.3}}</td>
+            <td>{{num.4}}</td>
+            <td>{{num.5}}</td>
+            <td>{{num.6}}</td>
+            <td>{{num.7}}</td>
+            <td>{{num.8}}</td>
+            <td>{{num.9}}</td>
+            <td>{{num.10}}</td>
+            <td>{{num.11}}</td>
+            <td>{{num.12}}</td>
+        </tr>
+        {% endfor %}
+        </tbody>
+    </table>
+
+    <h3>Диаграммы по исходным значениям</h3>
+
+    <div style="width: 90%">
+        <canvas id="chart1" width="300" height="100" style=""></canvas>
+    </div>
+    {% if data.num != '' %}
+    <h3>Прогноз на {{num}} {% if num == 1 %} год {% elif num > 1 and num < 5 %} года {% else %} лет {% endif %}</h3>
+    <div style="display: flex; justify-content: center; flex-direction: row; width: 80%">
+        <table style="margin-left: 0.2rem; width: 30%">
+            <thead>
+            <tr>
+                <th colspan="2">Прогноз по среднему абсолютному приросту равному -> {{data.avg_absolut_gain|floatformat:0}}</th>
+            </tr>
+            </thead>
+            <tbody>
+            <tr>
+                <th>Год</th>
+                <th>Данные по прогнозу</th>
+            </tr>
+            {% for num in data.forecast %}
+            <tr>
+                <th>{{num.0}}</th>
+                <th>{{num.1}}</th>
+            </tr>
+            {% endfor %}
+            </tbody>
+        </table>
+        <table style="margin-left: 0.2rem; width: 30%">
+            <thead>
+            <tr>
+                <th colspan="2">Прогноз по среднему коэффициенту роста равному -> {{data.avg_growth_rate|floatformat:3}}</th>
+            </tr>
+            </thead>
+            <tbody>
+            <tr>
+                <th>Год</th>
+                <th>Данные по прогнозу</th>
+            </tr>
+            {% for num in data.forecast_avg_growth %}
+            <tr>
+                <th>{{num.0}}</th>
+                <th>{{num.1}}</th>
+            </tr>
+            {% endfor %}
+            </tbody>
+        </table>
+    </div>
+    <h3>Диаграммы по прогнозу</h3>
+    <div style="width: 90%">
+        <canvas id="chart2" width="300" height="100"></canvas>
+    </div>
+    {% endif %}
+    <div class="row" style="margin-top: 1.7rem;">
+        <a class="but" href="{% static 'timeseries/files/test.docx' %}">Сохранить в docx файл</a>
+        <a class="but" href="{% static 'timeseries/files/test.pdf' %}">Сохранить в pdf файл</a>
+    </div>
+
+
+</div>
+<script>
+    let ctx1 = document.getElementById("chart1").getContext("2d");
+    let labels1 = {{ data.label | safe }}
+    let data1 = {{ data.data | safe }}
+    let chart1 = new Chart(ctx1, {
+        options: {
+            scales: {
+                y: {
+                    grid: {
+                        display: false,
+                    },
+                    title: {
+                        display: true,
+                        text: 'Рождаемость людей',
+                    },
+                },
+                x: {
+                    grid: {
+                        display: false,
+                    },
+                    title: {
+                        display: true,
+                        text: 'Года',
+                    },
+                },
+            }
+        },
+        data: {
+            labels: labels1,
+            datasets: [
+                {
+                    label: "ЛИНЕЙНАЯ ДИАГРАММА",
+                    backgroundColor: "#DABFAA",
+                    borderColor: "#DABFAA",
+                    data: data1,
+                    type: "line",
+                },
+                {
+                    label: "Гистограмма",
+                    backgroundColor: "#454545",
+                    borderColor: "#454545",
+                    data: data1,
+                    type: "bar",
+
+                },
+            ]
+        },
+    });
+    let ctx2 = document.getElementById("chart2").getContext("2d");
+    let years = {{data.forecast_date | safe}}
+    console.log(years)
+    let values = {{data.forecast_value | safe}}
+    let value_avg_move = {{ data.forecast_avg_growth_value | safe}}
+    let chart2 = new Chart(ctx2, {
+        options: {
+            scales: {
+                y: {
+                    grid: {
+                        display: false,
+                    },
+                    title: {
+                        display: true,
+                        text: 'Рождаемость людей',
+                    },
+                },
+                x: {
+                    grid: {
+                        display: false,
+                    },
+                    title: {
+                        display: true,
+                        text: 'Года',
+                    },
+                },
+            }
+        },
+        data: {
+            labels: years,
+            datasets: [
+                {
+                    label: "СРЕДНИЙ АБСОЛЮТНЫЙ ПРИРОСТ",
+                    backgroundColor: "#DABFAA",
+                    borderColor: "#DABFAA",
+                    data: values,
+                    type: "line",
+                },
+
+                {
+                    label: "СРЕДНИЙ КОЭФИЦИЕНТ РОСТА",
+                    backgroundColor: "#454545",
+                    borderColor: "#454545",
+                    data: value_avg_move,
+                    type: "bar",
+
+                },
+            ]
+        },
+    });
+</script>
+{% endblock %}

@@ -1,0 +1,25 @@
+{% extends 'timeseries/base.html' %}
+
+{% block content %}
+
+<div class="container top card" style="top: 25%;">
+    <form action="{% url 'data_output' %}" method="post" enctype="multipart/form-data">
+        {% csrf_token %}
+        <div class="col" style="align-items: center">
+            <p style="margin: 1rem 0 0 0">Добавьте файл с исходными данными в формате .csv и обязательно размещенные
+                <strong><a href="{% url 'guide_page' %}">по
+                    шаблону. </a></strong> И введите на сколько лет вы хотите сделать прогноз.</p>
+            <strong style="margin: 1rem 0; color:#DABFAA">{{error_message}}</strong>
+            <ul class="col" style="width: 80%; margin: 0; padding: 0 0 1rem 0">
+                {% for item in error_mass %}
+                <li style="color:#DABFAA">Строка {{item.0}} | Год {{item.1}} | Значение {{item.2}}</li>
+                {% endfor %}
+            </ul>
+            <input class="custom_but" type="file" name="file" accept=".csv">
+            <input class="inpt" type="number" name="num" placeholder="Количество лет" min="1" max="5">
+            <button class="but" style="margin: 1.5rem 0; " type="submit">Начать анализ</button>
+        </div>
+    </form>
+</div>
+
+{% endblock %}
